@@ -3,7 +3,7 @@ name: Deploy Ansible to EC2
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # permite ejecución manual
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -13,14 +13,9 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Call secret (debug)
-      run: |
-        echo "${{ secrets.MY_NEW_SECRET }}"
-
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
-        # Usar printf para preservar saltos de línea
         printf "%s" "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/Ansible.pem
         chmod 600 ~/.ssh/Ansible.pem
 
@@ -37,18 +32,13 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Retrieve Vault password from AWS Secrets Manager
-      run: |
-        ansible-playbook retrieve_vault_password.yml
+    - name: Retrieve Vault password
+      run: ansible-playbook retrieve_vault_password.yml
 
     - name: Debug inventory output
       working-directory: taller4
-      run: |
-        # Reemplazar con la IP real de tu EC2 si el inventario tiene placeholders
-        ansible-inventory -i inventario.aws_ec2.yml --list
+      run: ansible-inventory -i inventario.aws_ec2.yml --list
 
     - name: Run Ansible playbook
       working-directory: taller4
-      run: |
-        # Reemplazar con la IP real de tu EC2 si el inventario tiene placeholders
-        ansible-playbook site.yml --private-key ~/.ssh/Ansible.pem
+      run: ansible-playbook site.yml -i inventario.aws_ec2.yml --private-key ~/.ssh/Ansible.pem
