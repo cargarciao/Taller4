@@ -17,12 +17,11 @@
 
 - name: Gather database facts
   hosts: database
-  remote_user: ec2-user           # se conecta como ec2-user
-  gather_facts: yes               # ya que usás setup, gather_facts: yes también lo hace
+  remote_user: ec2-user      # <--- este es el cambio clave
+  gather_facts: yes
   tasks:
     - name: Gather facts about the database instance
       setup:
-
 
 - name: Provision the API server
   hosts: api
