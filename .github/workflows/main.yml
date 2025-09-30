@@ -20,8 +20,8 @@ jobs:
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/Ansible.pem
+        chmod 600 ~/.ssh/Ansible.pem
         
     - name: Set up Python & install Ansible + boto3
       run: |
@@ -48,4 +48,4 @@ jobs:
     - name: Run Ansible playbook
       working-directory: taller4
       run: |
-        ansible-playbook site.yml --private-key ~/.ssh/id_ed25519
+        ansible-playbook site.yml --private-key ~/.ssh/Ansible.pem
