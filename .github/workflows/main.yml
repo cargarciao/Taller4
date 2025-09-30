@@ -3,7 +3,7 @@ name: Deploy Ansible to EC2
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # ← esto habilita ejecución manual
+  workflow_dispatch:  # permite ejecución manual
 
 jobs:
   deploy:
@@ -13,19 +13,20 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: call secret
+    - name: Call secret (debug)
       run: |
         echo "${{ secrets.MY_NEW_SECRET }}"
 
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/Ansible.pem
+        # Usar printf para preservar saltos de línea
+        printf "%s" "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/Ansible.pem
         chmod 600 ~/.ssh/Ansible.pem
-        
+
     - name: Set up Python & install Ansible + boto3
       run: |
-        pip install --upgrade pip
+        python3 -m pip install --upgrade pip
         pip install ansible boto3 botocore
         ansible-galaxy collection install amazon.aws
 
@@ -39,13 +40,15 @@ jobs:
     - name: Retrieve Vault password from AWS Secrets Manager
       run: |
         ansible-playbook retrieve_vault_password.yml
-        
+
     - name: Debug inventory output
       working-directory: taller4
       run: |
+        # Reemplazar con la IP real de tu EC2 si el inventario tiene placeholders
         ansible-inventory -i inventario.aws_ec2.yml --list
-        
+
     - name: Run Ansible playbook
       working-directory: taller4
       run: |
+        # Reemplazar con la IP real de tu EC2 si el inventario tiene placeholders
         ansible-playbook site.yml --private-key ~/.ssh/Ansible.pem
